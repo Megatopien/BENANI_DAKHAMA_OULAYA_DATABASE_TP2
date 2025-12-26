@@ -1,0 +1,15 @@
+# Neo4j runtime data
+data/neo4j/
+data/**/transactions/
+data/**/databases/
+
+# Docker volumes
+**/volumes/
+
+# Python
+__pycache__/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
