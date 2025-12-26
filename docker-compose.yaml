@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: shop
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5.20
+    container_name: neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/neo4j123
+      - NEO4J_PLUGINS=["apoc","graph-data-science"]
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - ./data/neo4j:/data
+      - ./import:/import
+    restart: unless-stopped
+
+  app:
+    image: python:3.11-slim
+    container_name: fastapi_app
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    command: >
+      bash -c "pip install fastapi uvicorn psycopg2-binary neo4j pandas sqlalchemy &&
+               uvicorn main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - neo4j
+    restart: unless-stopped
